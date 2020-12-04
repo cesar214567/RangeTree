@@ -15,7 +15,7 @@ node * pibot2= nullptr;
 
 void create_simple (node* &st,vector<pair<int,int>> &v,int low,int high ){
     st = new node();
-    cout<<low<<" "<<high<<endl;
+ //   cout<<low<<" "<<high<<endl;
     if(low==high){
         if(pibot2)
             pibot2->next = st;
@@ -41,7 +41,7 @@ bool comp (pair<int,int> a,pair<int,int> b){
 
 vector<pair<int,int>> create (node* &st,vector<pair<int,int>> &v,int low,int high){
     st = new node();
-    cout<<low<<" "<<high<<endl;
+   // cout<<low<<" "<<high<<endl;
     if(low==high){
         if(pibot)
             pibot->next = st;
@@ -116,7 +116,7 @@ vector<pair<int,int>> insertRandomPoints(){
     srand(time(NULL));
     vector<pair<int,int>> v;
     for(int i = 0; i < 100000; i++){
-        v.push_back({rand()%10000,rand()%100000});
+        v.push_back({rand()%10,rand()%10});
     }    
     return v;
 }
@@ -124,11 +124,7 @@ vector<pair<int,int>> insertRandomPoints(){
 
 
 int main(){
-    vector<pair<int,int>> v;
-    v.push_back({2,10});
-    v.push_back({5,11});
-    v.push_back({9,13});
-    v.push_back({0,5});
+    vector<pair<int,int>> v= insertRandomPoints();
     sort(v.begin(),v.end());
     node *tree = nullptr;
     create(tree,v,0,v.size()-1);
