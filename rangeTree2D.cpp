@@ -1,5 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
+map<pair<int,int>,int> results;
+
 
 struct node{
     node *left=nullptr;
@@ -15,7 +17,7 @@ node * pibot2= nullptr;
 
 void create_simple (node* &st,vector<pair<int,int>> &v,int low,int high ){
     st = new node();
- //   cout<<low<<" "<<high<<endl;
+   // cout<<low<<" "<<high<<endl;
     if(low==high){
         if(pibot2)
             pibot2->next = st;
@@ -75,7 +77,7 @@ vector<pair<int,int>> range_min_query2(node* &st, int valuemin,int valuehigh, in
     auto temp = st;
     //logica
     while(temp->left){
-        if(valuemin < temp->value){
+        if(valuemin <= temp->value){
             temp = temp->left;
         }
         else{
@@ -85,7 +87,7 @@ vector<pair<int,int>> range_min_query2(node* &st, int valuemin,int valuehigh, in
 
     while (temp){
         if(temp->value<=valuehigh ){
-            if(temp->value >valuemin && temp->point.first >= valueminX && temp->point.first <= valuemaxX){
+            if(temp->value >= valuemin && temp->point.first >= valueminX && temp->point.first <= valuemaxX){
                 ret.push_back(temp->point);
             }
         }else{
@@ -99,10 +101,10 @@ vector<pair<int,int>> range_min_query2(node* &st, int valuemin,int valuehigh, in
 vector<pair<int,int>> range_min_query(node* &st, int valueminX,int valuehighX, int valueminY,int valuehighY){
     auto temp = st;
     while(temp->left){
-        if(valueminX < temp->value && valuehighX > temp->value){
+        if(valueminX <= temp->value && valuehighX >= temp->value){
             return range_min_query2(temp->subtree,valueminY,valuehighY, valueminX, valuehighX); 
         }
-        else if(valueminX < temp->value && valuehighX < temp->value){
+        else if(valueminX <= temp->value && valuehighX <= temp->value){
             temp = temp->left;
         }
         else{
@@ -115,25 +117,62 @@ vector<pair<int,int>> range_min_query(node* &st, int valueminX,int valuehighX, i
 
 
 vector<pair<int,int>> insertRandomPoints(){
-    srand(time(NULL));
     vector<pair<int,int>> v;
-    for(int i = 0; i < 100000; i++){
-        v.push_back({rand()%10,rand()%10});
+    for(int i = 0; i < 100; i++){
+        auto x  = rand()%100;
+        auto y = rand()%100;
+        cout << "insert: x: " << x << " y: " << y <<endl;
+        v.push_back({x,y});
     }    
     return v;
 }
 
+bool validate(vector<pair<int,int>> p,int minX,int maxX,int minY,int maxY){
+    cout << "Validando: " << endl;
+    for(size_t i = 0; i < p.size(); i++){
+        if(p[i].first >= minX && p[i].first <= maxX && p[i].second >= minY && p[i].second <= maxY){
+            cout << "x: " << p[i].first << " y: " << p[i].second << endl;
+            if(results[p[i]] == 0){
+               return false;
+            }
+            else{
+                results[p[i]]--;
+            }
+        }
+        else{
+            if(results[p[i]]!=0)
+                return false;
+        }
+    }
+    return true;
+}
 
 
 int main(){
+    srand(time(NULL));
+
     vector<pair<int,int>> v= insertRandomPoints();
     sort(v.begin(),v.end());
     node *tree = nullptr;
     create(tree,v,0,v.size()-1);
 
-    for (auto it:range_min_query(tree,0,3,4,6)){
-        cout<<"punto: x = "  << it.first << " y =  "<< it.second << endl;
+    // 0 1
+    // 2 6
+    for (auto it:range_min_query(tree,6,70,5,30)){
+       // cout<<"punto: x = "  << it.first << " y =  "<< it.second << endl;
+        results[{it.first,it.second}]++;
     }
+    cout << "MAPA " << endl;
+    for(auto it:results){
+        cout << "x: " << it.first.first << " y: " << it.first.second << " num: " << it.second << endl;
+    }
+    cout << "_--------------------" << endl;
+     if(!validate(v,6,70,5,30)){
+        cout << "MAL RESULTADO" << endl;
+    }
+     else
+         cout << "RESULTADO CORRECTO" << endl;
+
 }
 
 
