@@ -2,7 +2,6 @@
 using namespace std;
 map<pair<int,int>,int> results;
 
-
 struct node{
     node *left=nullptr;
     node *right=nullptr;
@@ -37,14 +36,18 @@ void create_simple (node* &st,vector<pair<int,int>> &v,int low,int high ){
 
 
 bool comp (pair<int,int> a,pair<int,int> b){
-    return a.second<b.second;
+    if (a.second==b.second){
+        return a.first<b.first;
+    } else{
+        return a.second<b.second;
+    }
 }
 
 
 vector<pair<int,int>> create (node* &st,vector<pair<int,int>> &v,int low,int high){
     st = new node();
    // cout<<low<<" "<<high<<endl;
-    if(low==high){
+    if(low==high){  
         if(pibot)
             pibot->next = st;
         vector<pair<int,int>> ret;
@@ -76,18 +79,23 @@ vector<pair<int,int>> range_min_query2(node* &st, int valuemin,int valuehigh, in
     vector<pair <int,int>> ret;
     auto temp = st;
     //logica
-    while(temp->left){
+    while(temp->left && temp->right){
         if(valuemin <= temp->value){
             temp = temp->left;
         }
         else{
-            temp = temp->right;
+            if(valuemin>=temp->left->value && valuemin<= temp->right->value){
+                temp =temp->left;
+            }else{
+                temp = temp->right;
+
+            }
         }
     }
-
+    
     while (temp){
-        if(temp->value<=valuehigh ){
-            if(temp->value >= valuemin && temp->point.first >= valueminX && temp->point.first <= valuemaxX){
+        if(temp->point.second<=valuehigh ){
+            if(temp->point.second >= valuemin  && temp->point.first >= valueminX && temp->point.first <= valuemaxX){
                 ret.push_back(temp->point);
             }
         }else{
@@ -97,8 +105,25 @@ vector<pair<int,int>> range_min_query2(node* &st, int valuemin,int valuehigh, in
     }
     return ret;
 }
+void print(node* root){
+    auto temp = root->subtree;
+    while(temp->left){
+        temp =temp->left;
+    }
+    cout<<endl;
+    while(temp){
+
+        temp= temp->next;
+    }
+}
+
 
 vector<pair<int,int>> range_min_query(node* &st, int valueminX,int valuehighX, int valueminY,int valuehighY){
+    auto left = st;
+    auto right = st;
+    int cont1=0;
+    int cont2=0;
+    
     auto temp = st;
     while(temp->left){
         if(valueminX <= temp->value && valuehighX >= temp->value){
@@ -111,42 +136,68 @@ vector<pair<int,int>> range_min_query(node* &st, int valueminX,int valuehighX, i
             temp = temp->right;
         }
     }
-    vector <pair<int, int>>vacio;
-    return vacio;
+    /*stack<node*> first;
+    stack<node*> second;
+    while(left->left){
+        first.push(left);
+        second.push(right);
+        if (valueminX<=left->value){
+            left = left->left;  
+        }else{
+            left = left->right;
+        }
+        if(valuehighX>=right->value){
+            right = right->right;
+        }else{
+            right = right->left;
+        }
+    }
+    while (left!= right){
+        left = first.top();
+        first.pop();
+        right = second.top();
+        second.pop();
+    }
+    /*cout<<"PRINTEANDO EL SUBARBOL ENCONTADOOOOOOO-----------"<<endl; 
+    print(left);
+    cout<<"----------------------------------------------"<<endl; 
+    return range_min_query2(left ->subtree,valueminY,valuehighY,valueminX,valuehighX);  
+    */
+    
 }
 
 
 vector<pair<int,int>> insertRandomPoints(){
     vector<pair<int,int>> v;
-    for(int i = 0; i < 100; i++){
+    for(int i = 0; i < 100000; i++){
         auto x  = rand()%100;
         auto y = rand()%100;
-        cout << "insert: x: " << x << " y: " << y <<endl;
         v.push_back({x,y});
     }    
     return v;
 }
 
-bool validate(vector<pair<int,int>> p,int minX,int maxX,int minY,int maxY){
-    cout << "Validando: " << endl;
+
+bool create_map(vector<pair<int,int>> p,int minX,int maxX,int minY,int maxY){
     for(size_t i = 0; i < p.size(); i++){
         if(p[i].first >= minX && p[i].first <= maxX && p[i].second >= minY && p[i].second <= maxY){
-            cout << "x: " << p[i].first << " y: " << p[i].second << endl;
-            if(results[p[i]] == 0){
-               return false;
-            }
-            else{
-                results[p[i]]--;
-            }
-        }
-        else{
-            if(results[p[i]]!=0)
-                return false;
+            results[p[i]]++;
         }
     }
     return true;
 }
-
+bool validate(vector<pair<int,int>> p,int minX,int maxX,int minY,int maxY){
+    cout << "Validando: " << endl;
+    for(size_t i = 0; i < p.size(); i++){
+        if(p[i].first >= minX && p[i].first <= maxX && p[i].second >= minY && p[i].second <= maxY){
+            results[p[i]]--;
+        }else{
+            
+            return false;
+        }
+    }
+    return true;
+}
 
 int main(){
     srand(time(NULL));
@@ -154,24 +205,33 @@ int main(){
     vector<pair<int,int>> v= insertRandomPoints();
     sort(v.begin(),v.end());
     node *tree = nullptr;
+    create_map(v,6,15,5,30);
     create(tree,v,0,v.size()-1);
+    print(tree);
 
-    // 0 1
-    // 2 6
-    for (auto it:range_min_query(tree,6,70,5,30)){
-       // cout<<"punto: x = "  << it.first << " y =  "<< it.second << endl;
-        results[{it.first,it.second}]++;
+    auto query =range_min_query(tree,6,15,5,30) ;
+    for(auto it:query){
+        cout<<it.first<<" "<<it.second<<endl;
     }
-    cout << "MAPA " << endl;
-    for(auto it:results){
-        cout << "x: " << it.first.first << " y: " << it.first.second << " num: " << it.second << endl;
+
+    cout<<"haciendo validacion"<<endl;
+    if(!validate(query,6,15,5,30)){
+        cout<<"devolvio un resultado erroneo"<<endl;
+    }else{
+        bool funciono =true;
+        for(auto it:results){
+            if(it.second!=0){
+                funciono=false;
+            }
+        }
+        if( funciono){
+            cout<<"funciono"<<endl;
+        }
+        else{
+            cout<<"no funciono"<<endl;
+        }
+
     }
-    cout << "_--------------------" << endl;
-     if(!validate(v,6,70,5,30)){
-        cout << "MAL RESULTADO" << endl;
-    }
-     else
-         cout << "RESULTADO CORRECTO" << endl;
 
 }
 
