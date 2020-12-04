@@ -70,7 +70,7 @@ void dfs(node* temp){
     dfs(temp->right);
 }
 
-vector<pair<int,int>> range_min_query2(node* &st, int valuemin,int valuehigh){
+vector<pair<int,int>> range_min_query2(node* &st, int valuemin,int valuehigh, int valueminX, int valuemaxX){
     vector<pair <int,int>> ret;
     auto temp = st;
     //logica
@@ -85,7 +85,9 @@ vector<pair<int,int>> range_min_query2(node* &st, int valuemin,int valuehigh){
 
     while (temp){
         if(temp->value<=valuehigh ){
-            if(temp->value >valuemin) ret.push_back(temp->point);
+            if(temp->value >valuemin && temp->point.first >= valueminX && temp->point.first <= valuemaxX){
+                ret.push_back(temp->point);
+            }
         }else{
             break;
         }
@@ -98,7 +100,7 @@ vector<pair<int,int>> range_min_query(node* &st, int valueminX,int valuehighX, i
     auto temp = st;
     while(temp->left){
         if(valueminX < temp->value && valuehighX > temp->value){
-            return range_min_query2(temp->subtree,valueminY,valuehighY); 
+            return range_min_query2(temp->subtree,valueminY,valuehighY, valueminX, valuehighX); 
         }
         else if(valueminX < temp->value && valuehighX < temp->value){
             temp = temp->left;
