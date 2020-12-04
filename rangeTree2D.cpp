@@ -112,6 +112,16 @@ vector<pair<int,int>> range_min_query(node* &st, int valueminX,int valuehighX, i
 }
 
 
+vector<pair<int,int>> insertRandomPoints(){
+    srand(time(NULL));
+    vector<pair<int,int>> v;
+    for(int i = 0; i < 100000; i++){
+        v.push_back({rand()%10000,rand()%100000});
+    }    
+    return v;
+}
+
+
 
 int main(){
     vector<pair<int,int>> v;
