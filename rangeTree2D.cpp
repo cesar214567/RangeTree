@@ -165,6 +165,7 @@ bool validate(vector<pair<int,int>> p,int minX,int maxX,int minY,int maxY){
     bool funciono = true;
     for(auto it:results){
         if(it.second != 0){
+            //cout << "(" << it.first.first << ", "<< it.first.second << ")" << "*:" << it.second << "\n";
             funciono = false;
         }
     }
