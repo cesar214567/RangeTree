@@ -177,7 +177,7 @@ bool validate(vector<pair<int,int>> p,int minX,int maxX,int minY,int maxY){
     return true;
 }
 
-void stress_testing(vector<int>& num_queries){
+bool stress_testing(vector<int>& num_queries){
     cout << "** Stress Testing **\n";
     for(auto num_elements : num_queries){
         cout << "\nTesting: " << num_elements << " elementos\n";
@@ -185,10 +185,14 @@ void stress_testing(vector<int>& num_queries){
         sort(v.begin(),v.end());
         node *tree = nullptr;
         create_map(v,6,15,5,30);
-        create(tree,v,0,v.size()-1);
-        print(tree);
 
+        auto t1 = std::chrono::high_resolution_clock::now();
+        create(tree,v,0,v.size()-1);
+        //print(tree);
         auto result_query = range_min_query(tree, 6, 15, 5, 30);
+        auto t2 = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
+        cout << "Tiempo de ejecución: " << duration << " milliseconds\n";
         /*for(auto it:result_query){
             cout<<it.first<<" "<<it.second<<endl;
         }*/
@@ -196,17 +200,26 @@ void stress_testing(vector<int>& num_queries){
         // Validacion Brute Force
         if(!validate(result_query, 6, 15, 5, 30)){
             cout<<"Validacion fallida: devolvio un resultado erroneo"<<endl;
+            return false;
         }
         else{
             cout << "Validacion exitosa.\n";
         }
     }
+    return true;
 }
 
 int main(){
     srand(time(NULL));
     vector<int> num_queries = {100, 1000, 10000};
-    stress_testing(num_queries);
+    bool isOK = stress_testing(num_queries);
+    if(isOK){
+        cout << "\nStress Testing: PASSED\n";
+    }
+    else {
+        cout << "\nStress Testing: FAILED\n";
+    }
+    return 0;
 }
 
 
