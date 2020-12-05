@@ -79,7 +79,7 @@ vector<pair<int,int>> range_min_query2(node* &st, int valuemin,int valuehigh, in
     vector<pair <int,int>> ret;
     auto temp = st;
     //logica
-    while(temp->left && temp->right){
+    while(temp && temp->left && temp->right){
         if(valuemin <= temp->value){
             temp = temp->left;
         }
@@ -119,7 +119,7 @@ void print(node* root){
 
 vector<pair<int,int>> range_min_query(node* &st, int valueminX,int valuehighX, int valueminY,int valuehighY){
     auto temp = st;
-    while(temp->left){
+    while(temp){
         if(valueminX <= temp->value && valuehighX >= temp->value){
             return range_min_query2(temp->subtree,valueminY,valuehighY, valueminX, valuehighX); 
         }
@@ -130,6 +130,7 @@ vector<pair<int,int>> range_min_query(node* &st, int valueminX,int valuehighX, i
             temp = temp->right;
         }
     }
+    return vector <pair <int, int>>();
 }
 
 
@@ -182,6 +183,7 @@ bool stress_testing(vector<int>& num_queries){
     for(auto num_elements : num_queries){
         cout << "\nTesting: " << num_elements << " elementos\n";
         vector<pair<int,int>> v= insertRandomPoints(num_elements);
+        //vector<pair<int,int>> v = {{20,1}, {40,97}, {49,54}, {52,2}, {67,91}, {71,72}, {71,77},{73,69}, {74,2},{99,22}};
         sort(v.begin(),v.end());
         node *tree = nullptr;
         create_map(v,6,15,5,30);
@@ -211,7 +213,7 @@ bool stress_testing(vector<int>& num_queries){
 
 int main(){
     srand(time(NULL));
-    vector<int> num_queries = {100, 1000, 10000};
+    vector<int> num_queries = {10, 10, 10, 10};
     bool isOK = stress_testing(num_queries);
     if(isOK){
         cout << "\nStress Testing: PASSED\n";
