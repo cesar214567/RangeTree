@@ -119,11 +119,6 @@ void print(node* root){
 
 
 vector<pair<int,int>> range_min_query(node* &st, int valueminX,int valuehighX, int valueminY,int valuehighY){
-    auto left = st;
-    auto right = st;
-    int cont1=0;
-    int cont2=0;
-    
     auto temp = st;
     while(temp->left){
         if(valueminX <= temp->value && valuehighX >= temp->value){
@@ -136,34 +131,6 @@ vector<pair<int,int>> range_min_query(node* &st, int valueminX,int valuehighX, i
             temp = temp->right;
         }
     }
-    /*stack<node*> first;
-    stack<node*> second;
-    while(left->left){
-        first.push(left);
-        second.push(right);
-        if (valueminX<=left->value){
-            left = left->left;  
-        }else{
-            left = left->right;
-        }
-        if(valuehighX>=right->value){
-            right = right->right;
-        }else{
-            right = right->left;
-        }
-    }
-    while (left!= right){
-        left = first.top();
-        first.pop();
-        right = second.top();
-        second.pop();
-    }
-    /*cout<<"PRINTEANDO EL SUBARBOL ENCONTADOOOOOOO-----------"<<endl; 
-    print(left);
-    cout<<"----------------------------------------------"<<endl; 
-    return range_min_query2(left ->subtree,valueminY,valuehighY,valueminX,valuehighX);  
-    */
-    
 }
 
 
@@ -187,14 +154,26 @@ bool create_map(vector<pair<int,int>> p,int minX,int maxX,int minY,int maxY){
     return true;
 }
 bool validate(vector<pair<int,int>> p,int minX,int maxX,int minY,int maxY){
-    cout << "Validando: " << endl;
+    cout << "Validando...(brute force) " << endl;
     for(size_t i = 0; i < p.size(); i++){
         if(p[i].first >= minX && p[i].first <= maxX && p[i].second >= minY && p[i].second <= maxY){
             results[p[i]]--;
         }else{
-            
             return false;
         }
+    }
+    bool funciono = true;
+    for(auto it:results){
+        if(it.second != 0){
+            funciono = false;
+        }
+    }
+    if(funciono){
+        cout<<"resultado correcto"<<endl;
+    }
+    else{
+        cout<<"resultado incorrecto"<<endl;
+        return false;
     }
     return true;
 }
@@ -209,28 +188,17 @@ int main(){
     create(tree,v,0,v.size()-1);
     print(tree);
 
-    auto query =range_min_query(tree,6,15,5,30) ;
-    for(auto it:query){
+    auto result_query = range_min_query(tree, 6, 15, 5, 30) ;
+    for(auto it:result_query){
         cout<<it.first<<" "<<it.second<<endl;
     }
 
-    cout<<"haciendo validacion"<<endl;
-    if(!validate(query,6,15,5,30)){
+    // Validacion Brute Force
+    if(!validate(result_query, 6, 15, 5, 30)){
         cout<<"devolvio un resultado erroneo"<<endl;
-    }else{
-        bool funciono =true;
-        for(auto it:results){
-            if(it.second!=0){
-                funciono=false;
-            }
-        }
-        if( funciono){
-            cout<<"funciono"<<endl;
-        }
-        else{
-            cout<<"no funciono"<<endl;
-        }
-
+    }
+    else{
+        cout << "Validacion exitosa.\n";
     }
 
 }
