@@ -112,7 +112,6 @@ void print(node* root){
     }
     cout<<endl;
     while(temp){
-
         temp= temp->next;
     }
 }
@@ -134,9 +133,9 @@ vector<pair<int,int>> range_min_query(node* &st, int valueminX,int valuehighX, i
 }
 
 
-vector<pair<int,int>> insertRandomPoints(){
+vector<pair<int,int>> insertRandomPoints(int num_elements){
     vector<pair<int,int>> v;
-    for(int i = 0; i < 100000; i++){
+    for(int i = 0; i < num_elements; i++){
         auto x  = rand()%100;
         auto y = rand()%100;
         v.push_back({x,y});
@@ -169,38 +168,45 @@ bool validate(vector<pair<int,int>> p,int minX,int maxX,int minY,int maxY){
         }
     }
     if(funciono){
-        cout<<"resultado correcto"<<endl;
+        cout<<"Resultado correcto"<<endl;
     }
     else{
-        cout<<"resultado incorrecto"<<endl;
+        cout<<"Resultado incorrecto"<<endl;
         return false;
     }
     return true;
 }
 
+void stress_testing(vector<int>& num_queries){
+    cout << "** Stress Testing **\n";
+    for(auto num_elements : num_queries){
+        cout << "\nTesting: " << num_elements << " elementos\n";
+        vector<pair<int,int>> v= insertRandomPoints(num_elements);
+        sort(v.begin(),v.end());
+        node *tree = nullptr;
+        create_map(v,6,15,5,30);
+        create(tree,v,0,v.size()-1);
+        print(tree);
+
+        auto result_query = range_min_query(tree, 6, 15, 5, 30);
+        /*for(auto it:result_query){
+            cout<<it.first<<" "<<it.second<<endl;
+        }*/
+
+        // Validacion Brute Force
+        if(!validate(result_query, 6, 15, 5, 30)){
+            cout<<"Validacion fallida: devolvio un resultado erroneo"<<endl;
+        }
+        else{
+            cout << "Validacion exitosa.\n";
+        }
+    }
+}
+
 int main(){
     srand(time(NULL));
-
-    vector<pair<int,int>> v= insertRandomPoints();
-    sort(v.begin(),v.end());
-    node *tree = nullptr;
-    create_map(v,6,15,5,30);
-    create(tree,v,0,v.size()-1);
-    print(tree);
-
-    auto result_query = range_min_query(tree, 6, 15, 5, 30) ;
-    for(auto it:result_query){
-        cout<<it.first<<" "<<it.second<<endl;
-    }
-
-    // Validacion Brute Force
-    if(!validate(result_query, 6, 15, 5, 30)){
-        cout<<"devolvio un resultado erroneo"<<endl;
-    }
-    else{
-        cout << "Validacion exitosa.\n";
-    }
-
+    vector<int> num_queries = {100, 1000, 10000};
+    stress_testing(num_queries);
 }
 
 
