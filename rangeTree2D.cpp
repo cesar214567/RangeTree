@@ -79,7 +79,7 @@ vector<pair<int,int>> range_min_query2(node* &st, int valuemin,int valuehigh, in
     vector<pair <int,int>> ret;
     auto temp = st;
     //logica
-    while(temp->left && temp->right){
+    while(temp && temp->left && temp->right){
         if(valuemin <= temp->value){
             temp = temp->left;
         }
@@ -112,21 +112,16 @@ void print(node* root){
     }
     cout<<endl;
     while(temp){
-
         temp= temp->next;
     }
 }
 
 
 vector<pair<int,int>> range_min_query(node* &st, int valueminX,int valuehighX, int valueminY,int valuehighY){
-    auto left = st;
-    auto right = st;
-    int cont1=0;
-    int cont2=0;
-    
     auto temp = st;
     while(temp->left){
-        if(valueminX <= temp->value && valuehighX >= temp->value){
+        if( (valueminX <= temp->value && valuehighX >= temp->value) || valueminX == temp->value || valuehighX == temp->value){
+        //if(valueminX <= temp->value && valuehighX >= temp->value){
             return range_min_query2(temp->subtree,valueminY,valuehighY, valueminX, valuehighX); 
         }
         else if(valueminX <= temp->value && valuehighX <= temp->value){
@@ -136,40 +131,13 @@ vector<pair<int,int>> range_min_query(node* &st, int valueminX,int valuehighX, i
             temp = temp->right;
         }
     }
-    /*stack<node*> first;
-    stack<node*> second;
-    while(left->left){
-        first.push(left);
-        second.push(right);
-        if (valueminX<=left->value){
-            left = left->left;  
-        }else{
-            left = left->right;
-        }
-        if(valuehighX>=right->value){
-            right = right->right;
-        }else{
-            right = right->left;
-        }
-    }
-    while (left!= right){
-        left = first.top();
-        first.pop();
-        right = second.top();
-        second.pop();
-    }
-    /*cout<<"PRINTEANDO EL SUBARBOL ENCONTADOOOOOOO-----------"<<endl; 
-    print(left);
-    cout<<"----------------------------------------------"<<endl; 
-    return range_min_query2(left ->subtree,valueminY,valuehighY,valueminX,valuehighX);  
-    */
-    
+    return vector <pair <int, int>>();
 }
 
 
-vector<pair<int,int>> insertRandomPoints(){
+vector<pair<int,int>> insertRandomPoints(int num_elements){
     vector<pair<int,int>> v;
-    for(int i = 0; i < 100000; i++){
+    for(int i = 0; i < num_elements; i++){
         auto x  = rand()%100;
         auto y = rand()%100;
         v.push_back({x,y});
@@ -179,6 +147,7 @@ vector<pair<int,int>> insertRandomPoints(){
 
 
 bool create_map(vector<pair<int,int>> p,int minX,int maxX,int minY,int maxY){
+    results.clear();
     for(size_t i = 0; i < p.size(); i++){
         if(p[i].first >= minX && p[i].first <= maxX && p[i].second >= minY && p[i].second <= maxY){
             results[p[i]]++;
@@ -187,52 +156,77 @@ bool create_map(vector<pair<int,int>> p,int minX,int maxX,int minY,int maxY){
     return true;
 }
 bool validate(vector<pair<int,int>> p,int minX,int maxX,int minY,int maxY){
-    cout << "Validando: " << endl;
+    //cout << "Validando...(brute force) " << endl;
     for(size_t i = 0; i < p.size(); i++){
         if(p[i].first >= minX && p[i].first <= maxX && p[i].second >= minY && p[i].second <= maxY){
             results[p[i]]--;
         }else{
-            
             return false;
         }
+    }
+    bool funciono = true;
+    for(auto it:results){
+        if(it.second != 0){
+            //cout << "(" << it.first.first << ", "<< it.first.second << ")" << "*:" << it.second << "\n";
+            funciono = false;
+        }
+    }
+    if(!funciono){
+        //cout<<"Resultado incorrecto"<<endl;
+        return false;
     }
     return true;
 }
 
-int main(){
-    srand(time(NULL));
-
-    vector<pair<int,int>> v= insertRandomPoints();
+void stress_testing(vector<int>& num_queries){
+    cout << "** Stress Testing **\n";
+    vector<pair<int,int>> v= insertRandomPoints(100000);
+    //vector<pair<int,int>> v = {{20,1}, {40,97}, {49,54}, {52,2}, {67,91}, {71,72}, {71,77},{73,69}, {74,2},{99,22}};
     sort(v.begin(),v.end());
     node *tree = nullptr;
-    create_map(v,6,15,5,30);
     create(tree,v,0,v.size()-1);
-    print(tree);
-
-    auto query =range_min_query(tree,6,15,5,30) ;
-    for(auto it:query){
-        cout<<it.first<<" "<<it.second<<endl;
-    }
-
-    cout<<"haciendo validacion"<<endl;
-    if(!validate(query,6,15,5,30)){
-        cout<<"devolvio un resultado erroneo"<<endl;
-    }else{
-        bool funciono =true;
-        for(auto it:results){
-            if(it.second!=0){
-                funciono=false;
+    for(auto num_elements : num_queries){
+        cout << "\nTesting: " << num_elements << " elementos\n";
+        //print(tree);
+        // Start Test
+        int timeExecution = 0;
+        int x1, x2, y1, y2;
+        int queriesOK = 0;
+        for(int i = 0; i < num_elements; i++){
+            x1 = rand()%100;
+            x2 = rand()%100;
+            y1 = rand()%100;
+            y2 = rand()%100;
+            //cout << x1 << " " << x2 << " " << y1 << " " << y2 << "\n";
+            auto t1 = std::chrono::high_resolution_clock::now();
+            auto result_query = range_min_query(tree, min(x1, x2), max(x1, x2), min(y1, y2), max(y1, y2));
+            auto t2 = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
+            //cout << "Tiempo de ejecución: " << duration << " milliseconds\n";
+            /*for(auto it:result_query){
+                cout<<it.first<<" "<<it.second<<endl;
+            }*/
+            // Validacion Brute Force
+            create_map(v,min(x1, x2), max(x1, x2), min(y1, y2), max(y1, y2));
+            if(!validate(result_query, min(x1, x2), max(x1, x2), min(y1, y2), max(y1, y2))){
+                //cout<<"Validacion fallida: devolvio un resultado erroneo"<<endl;
+            }
+            else{
+                //cout << "Validacion exitosa.\n";
+                queriesOK++;
+                timeExecution += duration;
             }
         }
-        if( funciono){
-            cout<<"funciono"<<endl;
-        }
-        else{
-            cout<<"no funciono"<<endl;
-        }
-
+        cout << "Queries OK: " << queriesOK << "\n";
+        cout << "Tiempo promedio de ejecución: " << timeExecution/queriesOK << " microsegundos\n";
     }
+}
 
+int main(){
+    srand(time(NULL));
+    vector<int> num_queries = {10, 100, 1000, 10000};
+    stress_testing(num_queries);
+    return 0;
 }
 
 
